@@ -1,5 +1,6 @@
 package com.android.example.flow.photoswipe
 
+import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.recker.photoswipeview.models.Photo
@@ -24,4 +25,5 @@ class MainActivity : AppCompatActivity() {
 
         photoSwipeView.setPhotos(photos)
     }
+
 }

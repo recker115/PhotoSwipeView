@@ -9,8 +9,10 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
+import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.doOnEnd
+import coil.api.load
 import com.recker.photoswipeview.models.Photo
 import kotlin.math.abs
 
@@ -18,12 +20,42 @@ import kotlin.math.abs
 /**
  * Created by Santanu 😁 on 2020-02-08.
  */
-class PhotoSwipeView(context: Context?, attrs: AttributeSet?) :
+class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
     ConstraintLayout(context, attrs), View.OnTouchListener {
     private val _mPhotos: MutableList<Photo> = mutableListOf()
     private val _photosViewList: MutableList<View> = mutableListOf()
     private var _currentPosition = 0
 
+    /**
+     * Each photo layout into which each image will be loaded
+     * It will have an imageView -- Its a layout resource file
+     */
+    @LayoutRes
+    private var mLayoutPhoto: Int = R.layout.photos_root_layout
+
+    /**
+     * This is the animation duration for slide out of the screen
+     * and also slide back to the initial position -- When the user does not drag the THRESHOLD length
+     */
+    private var mAnimationDuration: Int = 500
+
+    init {
+        attrs?.let {
+            val typedArray = context.obtainStyledAttributes(attrs, R.styleable.PhotoSwipeView)
+            for (i in 0 until typedArray.indexCount) {
+                when (typedArray.getIndex(i)) {
+                    R.styleable.PhotoSwipeView_photoLayout -> mLayoutPhoto = typedArray.getInteger(typedArray.getIndex(i), 0)
+                    R.styleable.PhotoSwipeView_animationDuration -> mAnimationDuration = typedArray.getInteger(typedArray.getIndex(i), 0)
+                }
+            }
+            typedArray.recycle()
+        }
+    }
+
+    /**
+     * This adds all the photos to be shown
+     * @param photos  Cumulative of all the photos to be shown one after another
+     */
     fun setPhotos(photos: List<Photo>) {
         _mPhotos.apply {
             clear()
@@ -33,19 +65,23 @@ class PhotoSwipeView(context: Context?, attrs: AttributeSet?) :
         notifyPhotosAdded()
     }
 
+    /**
+     * This adds the latest photo to the queue
+     */
     private fun notifyPhotosAdded() {
         if (_mPhotos.size > _currentPosition) {
             val view = LayoutInflater
                 .from(context)
-                .inflate(R.layout.photos_root_layout, this, false)
+                .inflate(mLayoutPhoto, this, false)
             val ivPhoto = view.findViewById<View>(R.id.ivPhoto) as ImageView
             val model = _mPhotos[_currentPosition]
 
-            if (_currentPosition % 3 == 0) {
+            ivPhoto.load(model.url)
+            /*if (_currentPosition % 3 == 0) {
                 ivPhoto.setImageResource(R.drawable.britney)
             } else if (_currentPosition % 2 == 0) {
                 ivPhoto.setImageResource(R.drawable.kim_kardashian)
-            }
+            }*/
 
             // TODO set the image to the imageView
             val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
@@ -62,6 +98,9 @@ class PhotoSwipeView(context: Context?, attrs: AttributeSet?) :
     private var dX = 0f
     private var dY: Float = 0f
 
+    /**
+     * Swipe / touch logic of the photos -- Swiped right or left
+     */
     override fun onTouch(view: View, event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
