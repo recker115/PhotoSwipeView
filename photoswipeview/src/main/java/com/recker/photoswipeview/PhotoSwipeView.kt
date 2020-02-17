@@ -34,6 +34,12 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
     private var mLayoutPhoto: Int = R.layout.photos_root_layout
 
     /**
+     * To notify the activity/view if the photo is completely swiped ( either right or left )
+     * @see swipe directions
+     */
+    private var callbackLambda: ((Int) -> Unit)? = null
+
+    /**
      * This is the animation duration for slide out of the screen
      * and also slide back to the initial position -- When the user does not drag the THRESHOLD length
      */
@@ -44,8 +50,10 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.PhotoSwipeView)
             for (i in 0 until typedArray.indexCount) {
                 when (typedArray.getIndex(i)) {
-                    R.styleable.PhotoSwipeView_photoLayout -> mLayoutPhoto = typedArray.getInteger(typedArray.getIndex(i), 0)
-                    R.styleable.PhotoSwipeView_animationDuration -> mAnimationDuration = typedArray.getInteger(typedArray.getIndex(i), 0)
+                    R.styleable.PhotoSwipeView_photoLayout -> mLayoutPhoto =
+                        typedArray.getInteger(typedArray.getIndex(i), 0)
+                    R.styleable.PhotoSwipeView_animationDuration -> mAnimationDuration =
+                        typedArray.getInteger(typedArray.getIndex(i), 0)
                 }
             }
             typedArray.recycle()
@@ -175,6 +183,10 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
                 if (abs(finalX) >= width) {
                     removeView(view)
                     _photosViewList.remove(view)
+                     if (finalX < 0)
+                         callbackLambda?.invoke(LEFT)
+                    else
+                         callbackLambda?.invoke(RIGHT)
                     notifyPhotosAdded()
                 }
 
@@ -186,7 +198,7 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
                         .start()
                 }
             }
-            duration = 250
+            duration = mAnimationDuration.toLong()
             start()
         }
     }
@@ -199,5 +211,12 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
             this,
             r.displayMetrics
         )
+    }
+
+    companion object {
+        @JvmStatic
+        val RIGHT = 1
+        @JvmStatic
+        val LEFT  = 0
     }
 }
