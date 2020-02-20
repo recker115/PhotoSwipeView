@@ -6,19 +6,21 @@ Swipe list of photos right , left and up with animation like tinder.
 **Usage Instructions** :-
 
 In root level `build.gradle` :-
-     
-     allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}
+```    
+allprojects {
+   repositories {
+       ...
+       maven { url 'https://jitpack.io' }
+   }
+}
+```
  
  In app level `build.gradle` file use , i.e, in dependencies:-
- 
+```
      dependencies {
 	    implementation 'com.github.recker115:PhotoSwipeView:Tag'
 	}
+```	
      
  
 First add the widget `photoView` to your xml file
