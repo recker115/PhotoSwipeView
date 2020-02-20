@@ -27,8 +27,10 @@ class MainActivity : AppCompatActivity() {
         photoSwipeView.setCallbackLambda { dir ->
             when (dir) {
                 PhotoSwipeView.RIGHT -> {
+                    // swiped right -- User likes general convention
                 }
                 PhotoSwipeView.LEFT -> {
+                    // swiped left -- User dislikes general convention
                 }
             }
         }
