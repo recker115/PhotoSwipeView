@@ -1,7 +1,7 @@
 # PhotoSwipeView
 Swipe list of photos right , left and up with animation like tinder.
 
-![](name-of-giphy.gif)
+![](2020-02-20 12.01.41.gif)
 
 **Usage Instructions** :-
 
