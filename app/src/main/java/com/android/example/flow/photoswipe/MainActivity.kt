@@ -1,8 +1,8 @@
 package com.android.example.flow.photoswipe
 
-import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.recker.photoswipeview.PhotoSwipeView
 import com.recker.photoswipeview.models.Photo
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -24,6 +24,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         photoSwipeView.setPhotos(photos)
+        photoSwipeView.setCallbackLambda { dir ->
+            when (dir) {
+                PhotoSwipeView.RIGHT -> {
+                }
+                PhotoSwipeView.LEFT -> {
+                }
+            }
+        }
     }
 
 }

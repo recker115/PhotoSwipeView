@@ -39,6 +39,10 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
      */
     private var callbackLambda: ((Int) -> Unit)? = null
 
+    fun setCallbackLambda(labmda: ((Int) -> Unit)) {
+        this.callbackLambda = labmda
+    }
+
     /**
      * This is the animation duration for slide out of the screen
      * and also slide back to the initial position -- When the user does not drag the THRESHOLD length
@@ -51,7 +55,7 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
             for (i in 0 until typedArray.indexCount) {
                 when (typedArray.getIndex(i)) {
                     R.styleable.PhotoSwipeView_photoLayout -> mLayoutPhoto =
-                        typedArray.getInteger(typedArray.getIndex(i), 0)
+                        typedArray.getResourceId(typedArray.getIndex(i), 0)
                     R.styleable.PhotoSwipeView_animationDuration -> mAnimationDuration =
                         typedArray.getInteger(typedArray.getIndex(i), 0)
                 }
