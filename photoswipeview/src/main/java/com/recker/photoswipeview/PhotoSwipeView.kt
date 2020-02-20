@@ -84,12 +84,12 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
             val ivPhoto = view.findViewById<View>(R.id.ivPhoto) as ImageView
             val model = _mPhotos[_currentPosition]
 
-            ivPhoto.load(model.url)
-            /*if (_currentPosition % 3 == 0) {
+//            ivPhoto.load(model.url)
+            if (_currentPosition % 3 == 0) {
                 ivPhoto.setImageResource(R.drawable.britney)
             } else if (_currentPosition % 2 == 0) {
                 ivPhoto.setImageResource(R.drawable.kim_kardashian)
-            }*/
+            }
 
             // TODO set the image to the imageView
             val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
