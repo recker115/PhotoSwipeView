@@ -1,6 +1,10 @@
 # PhotoSwipeView
 Swipe list of photos right , left and up with animation like tinder.
 
+![](name-of-giphy.gif)
+
+**Usage Instructions** :-
+
 First add the widget `photoView` to your xml file
 
      <com.recker.photoswipeview.PhotoSwipeView
