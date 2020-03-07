@@ -1,4 +1,5 @@
-# PhotoSwipeView
+# PhotoSwipeView.  [![](https://jitpack.io/v/recker115/PhotoSwipeView.svg)](https://jitpack.io/#recker115/PhotoSwipeView)
+
 Swipe list of photos right , left and up with animation like tinder.
 
 ![](photoSwipe.gif)
@@ -18,7 +19,7 @@ allprojects {
  In app level `build.gradle` file use , i.e, in dependencies:-
 ```
      dependencies {
-	 implementation 'com.github.recker115:PhotoSwipeView:v1.0'
+	 implementation 'com.github.recker115:PhotoSwipeView:v1.1'
      }
 ```	
      
