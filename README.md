@@ -19,7 +19,7 @@ allprojects {
  In app level `build.gradle` file use , i.e, in dependencies:-
 ```
      dependencies {
-	 implementation 'com.github.recker115:PhotoSwipeView:v1.0'
+	 implementation 'com.github.recker115:PhotoSwipeView:v1.1'
      }
 ```	
      
