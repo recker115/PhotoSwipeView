@@ -3,5 +3,6 @@
     <declare-styleable name="PhotoSwipeView">
         <attr name="photoLayout" format="reference" />
         <attr name="animationDuration" format="integer" />
+        <attr name="dragThreshold" format="integer"/>
     </declare-styleable>
 </resources>

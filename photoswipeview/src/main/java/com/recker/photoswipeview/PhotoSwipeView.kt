@@ -1,4 +1,4 @@
-package com.recker.photoswipeview
+package com.recker.photoswipelib
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -13,7 +13,8 @@ import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.doOnEnd
 import coil.api.load
-import com.recker.photoswipeview.models.Photo
+import com.recker.photoswipeview.R
+import java.util.*
 import kotlin.math.abs
 
 
@@ -22,8 +23,26 @@ import kotlin.math.abs
  */
 class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
     ConstraintLayout(context, attrs), View.OnTouchListener {
+
+    /**
+     * The photos pass to this widget , ( which are presented one after the other )
+     */
     private val _mPhotos: MutableList<Photo> = mutableListOf()
+
+    /**
+     * It holds ONLY 2 Views at a time
+     */
     private val _photosViewList: MutableList<View> = mutableListOf()
+
+    /**
+     * Get the corresponding User with respect of the photo
+     * Taken Weak as views are constantly removed and added : better for garbage collection
+     */
+    private val _viewToPhotoMap: WeakHashMap<View, Photo> = WeakHashMap()
+
+    /**
+     * The current position within the _photos list which is swiped
+     */
     private var _currentPosition = 0
 
     /**
@@ -37,10 +56,53 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
      * To notify the activity/view if the photo is completely swiped ( either right or left )
      * @see swipe directions
      */
-    private var callbackLambda: ((Int) -> Unit)? = null
+    private var callbackLambda: ((Int, Photo) -> Unit)? = null
 
-    fun setCallbackLambda(labmda: ((Int) -> Unit)) {
-        this.callbackLambda = labmda
+    /**
+     * It holds the number of clicks
+     * It holds true if like is clicked and false if dislike is clicked
+     */
+    private val eventStack = Stack<Boolean>()
+
+    /**
+     * This flag shows whether a photo is already animating or not
+     * If its animating we wont start animation on the next view
+     */
+    private var isTransitionInProgress: Boolean = false
+
+    /**
+     * The threshold till which each photo needs to be dragged
+     * to completely move out of the screen either left side / right side
+     */
+    private var dragThreshold = 300
+
+    fun setCallbackLambda(lambda: ((Int, Photo) -> Unit)) {
+        this.callbackLambda = lambda
+    }
+
+    fun likeOrDislikeClicked(isLike: Boolean = true) {
+        if (!isTransitionInProgress) {
+            if (childCount > 0) {
+                val viewToBeAnimated = if (childCount > 1) getChildAt(1) else getChildAt(0)
+                valueAnim(
+                    0.0f,
+                    if (isLike) viewToBeAnimated.width.toFloat() else -viewToBeAnimated.width.toFloat(),
+                    viewToBeAnimated,
+                    "X",
+                    true
+                )
+            }
+        } else {
+            if (eventStack.size > 0)
+                eventStack.pop()
+            eventStack.push(isLike)
+        }
+    }
+
+    private fun popEvent() {
+        if (eventStack.size > 0) {
+            likeOrDislikeClicked(eventStack.pop())
+        }
     }
 
     /**
@@ -57,6 +119,8 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
                     R.styleable.PhotoSwipeView_photoLayout -> mLayoutPhoto =
                         typedArray.getResourceId(typedArray.getIndex(i), 0)
                     R.styleable.PhotoSwipeView_animationDuration -> mAnimationDuration =
+                        typedArray.getInteger(typedArray.getIndex(i), 0)
+                    R.styleable.PhotoSwipeView_dragThreshold -> dragThreshold =
                         typedArray.getInteger(typedArray.getIndex(i), 0)
                 }
             }
@@ -88,12 +152,7 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
             val ivPhoto = view.findViewById<View>(R.id.ivPhoto) as ImageView
             val model = _mPhotos[_currentPosition]
 
-//            ivPhoto.load(model.url)
-            if (_currentPosition % 3 == 0) {
-                ivPhoto.setImageResource(R.drawable.britney)
-            } else if (_currentPosition % 2 == 0) {
-                ivPhoto.setImageResource(R.drawable.kim_kardashian)
-            }
+            ivPhoto.load(model.url)
 
             // TODO set the image to the imageView
             val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
@@ -101,9 +160,10 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
 
             view.setOnTouchListener(this)
             addView(view, 0)
-            _currentPosition++
 
             _photosViewList.add(view)
+            _viewToPhotoMap[view] = _mPhotos[_currentPosition]
+            _currentPosition++
         }
     }
 
@@ -153,7 +213,7 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
             }
 
             MotionEvent.ACTION_UP -> {
-                if (abs((event.rawX + dX)) > 400) {
+                if (abs((event.rawX + dX)) > dragThreshold) {
                     when {
                         (event.rawX + dX) > 0 -> {
                             valueAnim(event.rawX + dX, width.toFloat(), view, "X")
@@ -173,7 +233,14 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
         return true
     }
 
-    private fun valueAnim(initialX: Float, finalX: Float, view: View, type: String) {
+    private fun valueAnim(
+        initialX: Float,
+        finalX: Float,
+        view: View,
+        type: String,
+        isLikeOrDislike: Boolean = false
+    ) {
+        isTransitionInProgress = true // turn on the boolean flag
         val anim = ValueAnimator.ofFloat(initialX, finalX)
         anim.apply {
             addUpdateListener {
@@ -182,16 +249,22 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
                     "R" -> view.rotation = it.animatedValue as Float
                     "Y" -> view.y = it.animatedValue as Float
                 }
+                if (isLikeOrDislike && view.rotation < 0.4f && view.rotation >= -0.4f) {
+                    view.rotation = it.animatedValue as Float / 2
+                }
             }
             doOnEnd {
-                if (abs(finalX) >= width) {
-                    removeView(view)
-                    _photosViewList.remove(view)
-                     if (finalX < 0)
-                         callbackLambda?.invoke(LEFT)
+                isTransitionInProgress = false // turn off the boolean flag
+                if (abs(finalX) >= width || isLikeOrDislike) {
+                    if (finalX < 0)
+                        callbackLambda?.invoke(LEFT, _viewToPhotoMap[view]!!)
                     else
-                         callbackLambda?.invoke(RIGHT)
+                        callbackLambda?.invoke(RIGHT, _viewToPhotoMap[view]!!)
+                    removeView(view)
+                    _viewToPhotoMap.remove(view)
+                    _photosViewList.remove(view)
                     notifyPhotosAdded()
+                    popEvent()
                 }
 
                 // TODO MOVE IT TO SMOOTH ANIMATION -- FOR THE VIEW BEHIND
@@ -202,7 +275,7 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
                         .start()
                 }
             }
-            duration = mAnimationDuration.toLong()
+            duration = if (!isLikeOrDislike) mAnimationDuration.toLong() else 300
             start()
         }
     }
@@ -220,7 +293,19 @@ class PhotoSwipeView(context: Context, attrs: AttributeSet?) :
     companion object {
         @JvmStatic
         val RIGHT = 1
+
         @JvmStatic
-        val LEFT  = 0
+        val LEFT = 0
+    }
+
+    /**
+     * Created by Santanu 😁 on 2020-02-08.
+     */
+    abstract class Photo {
+
+        /**
+         * Must be provided by the client
+         */
+        abstract val url: String?
     }
 }
