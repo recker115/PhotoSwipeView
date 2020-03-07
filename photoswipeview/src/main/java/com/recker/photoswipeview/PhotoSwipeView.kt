@@ -1,4 +1,4 @@
-package com.recker.photoswipelib
+package com.recker.photoswipeview
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -13,7 +13,6 @@ import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.doOnEnd
 import coil.api.load
-import com.recker.photoswipeview.R
 import java.util.*
 import kotlin.math.abs
 
