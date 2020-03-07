@@ -1,7 +1,6 @@
-# PhotoSwipeView
-Swipe list of photos right , left and up with animation like tinder.
+# PhotoSwipeView.  [![](https://jitpack.io/v/recker115/PhotoSwipeView.svg)](https://jitpack.io/#recker115/PhotoSwipeView)
 
-[![](https://jitpack.io/v/recker115/PhotoSwipeView.svg)](https://jitpack.io/#recker115/PhotoSwipeView)
+Swipe list of photos right , left and up with animation like tinder.
 
 ![](photoSwipe.gif)
 
